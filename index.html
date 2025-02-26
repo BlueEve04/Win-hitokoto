@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resizable Page</title>
+  <style>
+    body {
+    margin: 0;
+    background: rgba(255, 255, 255, 0);
+    -webkit-app-region: drag;
+    overflow: hidden;
+    color: white;
+    font-family: Arial, sans-serif;
+    transition: background-color 0.3s ease; /* 背景颜色变化平滑过渡 */
+  }
+
+    #sentence-container {
+      text-align: center;
+      font-size: 30px; /* 调整字体大小 */
+      line-height: 1.2;
+      font-style: normal;
+      text-shadow: 4px 4px 3px #2b2b2b;
+      max-width: 90%; /* 确保文本不超出边界 */
+      margin: auto;
+      -webkit-line-clamp: 3; /* 限制为三行 */
+      -webkit-box-orient: vertical;
+      text-overflow: ellipsis; /* 显示省略号 */
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  
+
+    #update-btn,
+    #close-btn,
+    #settings-btn {
+      -webkit-app-region: no-drag;
+      pointer-events: auto;
+    }
+
+    #update-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #6b6b6b00;
+      color: rgba(99, 184, 142, 0.62);
+      border: none;
+      border-radius: 10px;
+    }
+
+    #close-btn {
+      position: absolute;
+      top: 30px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      background-color: rgba(255, 0, 0, 0.199);
+      color: white;
+      border: none;
+      border-radius: 50%;
+    }
+    #update-btn:focus, #update-btn:active {
+      outline: none; /* 去掉焦点轮廓 */
+      box-shadow: none; /* 去掉阴影 */
+    }
+
+    #settings-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 10px;
+      cursor: pointer;
+      background-color: #002e5e00;
+      color: rgba(65, 106, 181, 0.521);
+      border: none;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="sentence-container">
+    <!-- 随机句子显示区 -->
+  </div>
+  <button id="update-btn">手动更新句子</button>
+  <button id="settings-btn">设置</button>
+  <button id="close-btn">X</button>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+  
+    // 接收并更新句子内容
+    ipcRenderer.on('new-sentence', (event, sentence) => {
+      const sentenceContainer = document.getElementById('sentence-container');
+      sentenceContainer.innerHTML = `
+        <p>"${sentence.hitokoto}"</p>
+        <p>—— 来自 ${sentence.from}${sentence.from_who ? `, ${sentence.from_who}` : ''}</p>
+      `;
+    });
+  
+    // 更新背景颜色
+    ipcRenderer.on('update-background-color', (event, color) => {
+      document.body.style.backgroundColor = color;
+    });
+  
+
+
+    // 手动更新按钮点击事件
+    document.getElementById('update-btn').addEventListener('click', () => {
+      ipcRenderer.send('manual-update');
+    });
+
+    // 打开设置窗口按钮点击事件
+    document.getElementById('settings-btn').addEventListener('click', () => {
+      ipcRenderer.send('open-settings-window');
+    });
+
+    // 关闭按钮点击事件
+    document.getElementById('close-btn').addEventListener('click', () => {
+      ipcRenderer.send('close-window');
+    });
+  </script>
+</body>
+</html>
